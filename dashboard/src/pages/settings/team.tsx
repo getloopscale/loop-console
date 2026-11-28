@@ -109,7 +109,9 @@ export function TeamPage() {
       }
     >
       <Card>
+        {/* The table scrolls sideways inside the card; the page never does. */}
         <Card.Body className="p-0">
+          <div data-slot="table-scroll" className="overflow-x-auto">
           <Table>
             <Table.Header>
               <Table.Row>
@@ -197,6 +199,7 @@ export function TeamPage() {
               })}
             </Table.Body>
           </Table>
+          </div>
         </Card.Body>
       </Card>
 

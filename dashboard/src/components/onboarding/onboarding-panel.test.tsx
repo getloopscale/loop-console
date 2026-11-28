@@ -56,16 +56,18 @@ describe('OnboardingPanel (Sprint 3 T3.2 v2 — floating panel pattern)', () => 
     mockUseOnboardingState.mockReturnValue(makeHookResult({ completed: 1 }));
     render(<OnboardingPanel />);
     await userEvent.click(screen.getByLabelText(/get your app live/i));
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(screen.getByText('Get your app live')).toBeInTheDocument();
+    // The checklist opens as the standard modal, not as a panel pinned to a corner.
+    const dialog = await screen.findByRole('dialog', { name: 'Get your app live' });
+    expect(dialog.querySelector('[data-slot="modal-header"]')).not.toBeNull();
+    expect(dialog.querySelector('[data-slot="modal-body"]')).not.toBeNull();
   });
 
   it('test_collapses_back_to_badge_via_chevron', async () => {
     mockUseOnboardingState.mockReturnValue(makeHookResult({ completed: 1 }));
     render(<OnboardingPanel />);
     await userEvent.click(screen.getByLabelText(/get your app live/i));
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
-    await userEvent.click(screen.getByLabelText('Collapse to badge'));
+    await screen.findByRole('dialog', { name: 'Get your app live' }); // the checklist is fetched on open
+    await userEvent.click(screen.getByRole('button', { name: 'Close' }));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
@@ -74,6 +76,7 @@ describe('OnboardingPanel (Sprint 3 T3.2 v2 — floating panel pattern)', () => 
     mockUseOnboardingState.mockReturnValue(makeHookResult({ completed: 1, dismiss }));
     render(<OnboardingPanel />);
     await userEvent.click(screen.getByLabelText(/get your app live/i));
+    await screen.findByRole('dialog', { name: 'Get your app live' }); // the checklist is fetched on open
     await userEvent.click(screen.getByLabelText('Dismiss onboarding'));
     expect(dismiss).toHaveBeenCalledTimes(1);
   });
@@ -82,6 +85,7 @@ describe('OnboardingPanel (Sprint 3 T3.2 v2 — floating panel pattern)', () => 
     mockUseOnboardingState.mockReturnValue(makeHookResult());
     render(<OnboardingPanel />);
     await userEvent.click(screen.getByLabelText(/get your app live/i));
+    await screen.findByRole('dialog', { name: 'Get your app live' }); // the checklist is fetched on open
     expect(screen.getByText('Install the LoopScale CLI')).toBeInTheDocument();
     expect(screen.getByText('Sign in')).toBeInTheDocument();
     expect(screen.getByText('Initialize your first project')).toBeInTheDocument();
@@ -93,6 +97,7 @@ describe('OnboardingPanel (Sprint 3 T3.2 v2 — floating panel pattern)', () => 
     mockUseOnboardingState.mockReturnValue(makeHookResult());
     render(<OnboardingPanel />);
     await userEvent.click(screen.getByLabelText(/get your app live/i));
+    await screen.findByRole('dialog', { name: 'Get your app live' }); // the checklist is fetched on open
     // All 5 CLI commands visible em panel expanded.
     // Sprint 4 qa-sprint4-cleanup-2026-06-25 #32: `loopscale init` (which does NOT
     // exist in the CLI then) replaced with canonical `loopscale project create my-app`.
@@ -107,6 +112,7 @@ describe('OnboardingPanel (Sprint 3 T3.2 v2 — floating panel pattern)', () => 
     mockUseOnboardingState.mockReturnValue(makeHookResult());
     render(<OnboardingPanel />);
     await userEvent.click(screen.getByLabelText(/get your app live/i));
+    await screen.findByRole('dialog', { name: 'Get your app live' }); // the checklist is fetched on open
     expect(screen.getByText('optional')).toBeInTheDocument();
   });
 
@@ -120,6 +126,7 @@ describe('OnboardingPanel (Sprint 3 T3.2 v2 — floating panel pattern)', () => 
     render(<OnboardingPanel />);
     // Expand the panel so the progress bar is visible.
     await userEvent.click(screen.getByLabelText(/get your app live/i));
+    await screen.findByRole('dialog', { name: 'Get your app live' }); // the checklist is fetched on open
     const bar = screen.getByRole('progressbar', { name: /onboarding progress/i });
     expect(bar).toBeInTheDocument();
     expect(bar.getAttribute('aria-valuenow')).toBe('60');
@@ -132,6 +139,7 @@ describe('OnboardingPanel (Sprint 3 T3.2 v2 — floating panel pattern)', () => 
     mockUseOnboardingState.mockReturnValue(makeHookResult({ markStepDone }));
     render(<OnboardingPanel />);
     await userEvent.click(screen.getByLabelText(/get your app live/i));
+    await screen.findByRole('dialog', { name: 'Get your app live' }); // the checklist is fetched on open
     await userEvent.click(screen.getByRole('button', { name: 'I installed it' }));
     expect(markStepDone).toHaveBeenCalledWith('cli_installed');
   });

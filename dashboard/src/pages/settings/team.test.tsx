@@ -58,7 +58,11 @@ describe('TeamPage', () => {
     // At 390px the five columns made the whole document 574px wide (#677).
     render(<TeamPage />);
     const table = await screen.findByRole('table');
-    expect(table.closest('[data-slot="table-scroll"]')?.className).toMatch(/overflow-x-auto/);
+    const scroller = table.closest('[data-slot="table-scroll"]');
+    expect(scroller?.className).toMatch(/overflow-x-auto/);
+    // The "Actions" header is a visually hidden, absolutely positioned label. Without a
+    // positioned scroller it escapes the clipping and widens the document by itself.
+    expect(scroller?.className).toMatch(/(^|\s)relative(\s|$)/);
   });
 
   it('test_team_invite_member_opens_dialog', async () => {

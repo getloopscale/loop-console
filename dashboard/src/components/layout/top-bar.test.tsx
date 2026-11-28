@@ -32,6 +32,16 @@ describe('TopBar', () => {
     expect(screen.getByText('All Projects')).toBeInTheDocument();
   });
 
+  it('offers a control that opens the menu, for the windows where the sidebar is put away', () => {
+    const onMenuOpen = vi.fn();
+    render(<TopBar onMenuOpen={onMenuOpen} menuOpen={false} />);
+    const control = screen.getByRole('button', { name: 'Open menu' });
+    expect(control).toHaveAttribute('aria-expanded', 'false');
+    expect(control.className).toMatch(/(^|\s)md:hidden(\s|$)/);
+    control.click();
+    expect(onMenuOpen).toHaveBeenCalledTimes(1);
+  });
+
   it('test_top_bar_hides_project_selector_when_prop_false', () => {
     render(<TopBar showProjectSelector={false} />);
     expect(screen.queryByText('All Projects')).not.toBeInTheDocument();

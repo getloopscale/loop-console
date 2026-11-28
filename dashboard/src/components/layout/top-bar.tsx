@@ -1,5 +1,5 @@
 import { matchPath, useLocation, useNavigate } from 'react-router-dom';
-import { ChevronRight, FolderKanban, Search } from 'lucide-react';
+import { ChevronRight, FolderKanban, Menu, Search } from 'lucide-react';
 import { Select } from '@getloopscale/ui';
 import { useProjects } from '@/hooks/projects/use-projects';
 import { breadcrumbTrail } from './breadcrumb-trail';
@@ -8,6 +8,9 @@ interface TopBarProps {
   showProjectSelector?: boolean;
   /** Sprint 2 T2.6 — invoked when user clicks the search/command button. */
   onCommandPaletteOpen?: () => void;
+  /** Opens the sidebar on a window narrow enough to have it put away. */
+  onMenuOpen?: () => void;
+  menuOpen?: boolean;
 }
 
 // EC-13 platform-aware shortcut display
@@ -34,7 +37,7 @@ const SHORTCUT_LABEL = isMac ? '⌘K' : 'Ctrl+K';
  * Uses use-projects.ts cache (D-3 v1.1) — same fetch shared with Overview
  * and Projects page without duplicate network calls.
  */
-export function TopBar({ showProjectSelector = true, onCommandPaletteOpen }: TopBarProps) {
+export function TopBar({ showProjectSelector = true, onCommandPaletteOpen, onMenuOpen, menuOpen = false }: TopBarProps) {
   const { projects } = useProjects();
   const location = useLocation();
   const navigate = useNavigate();
@@ -52,6 +55,17 @@ export function TopBar({ showProjectSelector = true, onCommandPaletteOpen }: Top
 
   return (
     <header className="h-12 shrink-0 border-b border-border bg-card sticky top-0 z-20 flex items-center gap-3 px-4">
+      {onMenuOpen && (
+        <button
+          type="button"
+          onClick={onMenuOpen}
+          aria-label="Open menu"
+          aria-expanded={menuOpen}
+          className="inline-flex size-8 shrink-0 items-center justify-center rounded-md border border-border text-foreground/75 hover:bg-muted/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary md:hidden"
+        >
+          <Menu className="size-4" aria-hidden="true" />
+        </button>
+      )}
       {/* Left slot — project selector (the primary nav widget for project-scoped
        * pages). Placed first per Vercel/Linear convention. */}
       {shouldShowSelector && (
@@ -130,8 +144,8 @@ export function TopBar({ showProjectSelector = true, onCommandPaletteOpen }: Top
             aria-label={`Search — open command palette (${SHORTCUT_LABEL})`}
           >
             <Search className="size-4" aria-hidden="true" />
-            <span className="text-left">Search…</span>
-            <kbd className="rounded border border-border px-1 font-mono text-[11px] text-foreground/60">
+            <span className="text-left max-sm:hidden">Search…</span>
+            <kbd className="rounded border border-border px-1 font-mono text-[11px] text-foreground/60 max-sm:hidden">
               {SHORTCUT_LABEL}
             </kbd>
           </button>

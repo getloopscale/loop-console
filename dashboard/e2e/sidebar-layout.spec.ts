@@ -45,3 +45,31 @@ test.describe('sidebar on a short window', () => {
     expect((await box(sidebar.getByRole('button', { name: /switch team/i }))).top).toBe(switcher.top);
   });
 });
+
+test.describe('sidebar on a phone', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test('is put away until opened, and closes when a link is followed', async ({ page }) => {
+    await page.goto('/projects');
+    await expect(page.locator('h1').first()).toBeVisible();
+    const sidebar = page.locator('aside');
+    const open = page.getByRole('button', { name: 'Open menu' });
+
+    // Put away: off the page, and the page has the whole width.
+    await expect(sidebar).not.toBeInViewport();
+    expect((await page.locator('main').boundingBox())?.width).toBe(390);
+
+    await open.click();
+    await expect(sidebar).toBeInViewport();
+    await expect(open).toHaveAttribute('aria-expanded', 'true');
+
+    await sidebar.getByRole('link', { name: 'Billing' }).click();
+    await expect(page).toHaveURL(/\/billing$/);
+    await expect(sidebar).not.toBeInViewport();
+
+    await open.click();
+    await expect(sidebar).toBeInViewport();
+    await page.keyboard.press('Escape');
+    await expect(sidebar).not.toBeInViewport();
+  });
+});

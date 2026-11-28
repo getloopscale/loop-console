@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, FlaskConical, ShieldCheck } from 'lucide-react';
 import { Button, Card, FormField, Textarea } from '@getloopscale/ui';
-import { PageShell } from '@/components/ui/page-shell';
+import { RouteModal } from '@/components/ui/route-modal';
 
 import { GuardrailRuleFields } from '@/pages/trust/components/guardrail-rule-fields';
 
@@ -146,10 +146,21 @@ export function TrustGuardrailNewPage() {
   }
 
   return (
-    <PageShell
+    <RouteModal
       title="New guardrail"
       description="The terms below start being blocked in this workspace conversations as soon as the rule is saved."
+      backTo="/trust/guardrails"
+      busy={busy === 'saving'}
+      footer={
+        <Button variant="ghost" asChild>
+          <Link to="/trust/guardrails">
+            <ArrowLeft className="size-4" aria-hidden="true" />
+            Back to guardrails
+          </Link>
+        </Button>
+      }
     >
+      <div className="space-y-6">
       <GuardrailRuleFields
         draft={draft}
         termsText={termsText}
@@ -247,15 +258,7 @@ export function TrustGuardrailNewPage() {
           </Card.Footer>
         </Card>
       ) : null}
-
-      {/* A saída. Sem ela, quem abre esta tela por engano só escapa pelo botão do navegador —
-          e o item "Trust" do menu leva ao overview, não de volta ao catálogo. */}
-      <Button variant="ghost" asChild>
-        <Link to="/trust/guardrails">
-          <ArrowLeft className="size-4" aria-hidden="true" />
-          Back to guardrails
-        </Link>
-      </Button>
-    </PageShell>
+      </div>
+    </RouteModal>
   );
 }

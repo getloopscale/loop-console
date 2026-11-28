@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { Badge, Button, Card, Input } from '@getloopscale/ui';
-import { PageShell } from '@/components/ui/page-shell';
+import { RouteModal } from '@/components/ui/route-modal';
 
 import { Alert } from '@/components/ui/alert-guard';
 import { faseDaOperacao } from '@/pages/skills/components/operation-state';
@@ -169,13 +169,17 @@ export function SkillAuthoringPage() {
   const failed = fase === 'falhou';
 
   return (
-    <PageShell
+    <RouteModal
       title="New skill"
       description="Write it, validate without publishing, and publish while watching the operation."
+      backTo="/skills"
+      footer={
+        <Button variant="ghost" asChild>
+          <Link to="/skills">Back to the registry</Link>
+        </Button>
+      }
     >
-      <Link to="/skills" className="text-sm text-muted-foreground underline-offset-4 hover:underline">
-        ← Back to the registry
-      </Link>
+      <div className="space-y-6">
 
       {erroPublicacao !== null ? (
         <Alert intent="destructive" title="The skill was not published" description={erroPublicacao} />
@@ -456,6 +460,7 @@ export function SkillAuthoringPage() {
           </div>
         </Card>
       ) : null}
-    </PageShell>
+      </div>
+    </RouteModal>
   );
 }

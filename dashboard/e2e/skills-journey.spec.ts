@@ -843,7 +843,11 @@ test.describe('as URLs antigas em português continuam resolvendo', () => {
       // E chega na TELA, não numa rota que resolve para o detalhe de uma skill inexistente —
       // que é o que `/skills/new` faria se a rota estática não tivesse precedência sobre
       // `/skills/:skillId`.
-      await expect(page.getByRole('heading', { name: titulo, level: 1 })).toBeVisible();
+      // New skill opens as a modal over the Skills screen, so its title names a dialog.
+      const tela = antiga === '/skills/nova'
+        ? page.getByRole('dialog', { name: titulo })
+        : page.getByRole('heading', { name: titulo, level: 1 });
+      await expect(tela).toBeVisible();
     });
   }
 });

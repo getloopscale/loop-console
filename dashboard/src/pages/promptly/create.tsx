@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Button, Card, FormField, Textarea } from '@getloopscale/ui';
-import { PageShell } from '@/components/ui/page-shell';
+import { RouteModal } from '@/components/ui/route-modal';
 
 import { Alert } from '@/components/ui/alert-guard';
 import { usePageMeta } from '@/hooks/use-page-meta';
@@ -75,10 +75,24 @@ export function PromptlyCreatePage() {
   }
 
   return (
-    <PageShell
+    <RouteModal
       title="New revision"
       description={fraseDePermanencia(suggestedName !== '', nextVersion)}
+      backTo={suggestedName ? `/promptly/${encodeURIComponent(suggestedName)}` : '/promptly'}
+      busy={create.isPending}
+      footer={
+        <>
+          {/* The way out. Closing goes back; nothing immutable is written. */}
+          <Button variant="ghost" asChild>
+            <Link to={suggestedName ? `/promptly/${encodeURIComponent(suggestedName)}` : '/promptly'}>Cancel</Link>
+          </Button>
+          <Button onClick={save} disabled={!validacao.ok || create.isPending}>
+            {create.isPending ? 'Creating…' : `Create revision v${nextVersion}`}
+          </Button>
+        </>
+      }
     >
+      <div className="space-y-6">
       {recusa ? (
         <Alert intent="destructive" title="The revision was not created" description={recusa} />
       ) : null}
@@ -192,19 +206,8 @@ export function PromptlyCreatePage() {
         </div>
       </Card>
 
-      <div className="flex gap-3">
-        <Button onClick={save} disabled={!validacao.ok || create.isPending}>
-          {create.isPending ? 'Creating…' : `Create revision v${nextVersion}`}
-        </Button>
-        {/* Saída explícita. Um formulário sem volta prende o operador na tela que ele abriu por
-            engano — e aqui a tecla de escape é voltar, não gravar algo imutável. */}
-        <Button variant="ghost" asChild>
-          <Link to={suggestedName ? `/promptly/${encodeURIComponent(suggestedName)}` : '/promptly'}>
-            Cancelar
-          </Link>
-        </Button>
       </div>
-    </PageShell>
+    </RouteModal>
   );
 }
 

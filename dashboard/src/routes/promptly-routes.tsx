@@ -42,7 +42,7 @@ export const rotasDePromptly = (
     {/* `/promptly/new` ANTES do segmento dinâmico. O ranking do roteador já
     prefere o estático, mas a ordem explícita é o que impede alguém de ler
     "new" como nome de prompt ao mover uma linha daqui. */}
-    <Route path="/promptly/new" element={<Boundaried path="/promptly/new"><PromptlyCreatePage /></Boundaried>} />
+    <Route path="/promptly/new" element={<Boundaried path="/promptly/new"><PromptlyOverviewPage /><PromptlyCreatePage /></Boundaried>} />
     {/* `/promptly/catalogo` é literal e cai na mesma classe de `/promptly/new`:
     precede o segmento dinâmico, senão o roteador o trata como nome de prompt. */}
     {/* As rotas em português continuam RESOLVENDO. A URL é parte do que o usuário vê, mas um

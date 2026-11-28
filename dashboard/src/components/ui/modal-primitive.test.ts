@@ -336,3 +336,22 @@ describe('primitivo de modal único', () => {
     expect(primitivo).toMatch(/max-w-/);
   });
 });
+
+describe('no dialog is made by hand', () => {
+  it('only the shared modal gives an element the dialog role', () => {
+    // The onboarding checklist and the Traces column choice were `<div role="dialog">` panels:
+    // one pinned to a corner, the other 92px wide under its button. Neither imported a dialog
+    // library, so the import ratchets above could not see them. The role is what makes a
+    // dialog, so the role is what this looks for.
+    const offenders: string[] = [];
+    let scanned = 0;
+    for (const f of arquivosDeProducao()) {
+      const rel = relative(SRC, f).replace(/\\/g, '/');
+      scanned++;
+      if (rel === PRIMITIVO) continue;
+      if (/role=["'{]+(?:alert)?dialog/.test(readFileSync(f, 'utf8'))) offenders.push(rel);
+    }
+    expect(scanned).toBeGreaterThan(100);
+    expect(offenders, 'Use AppModal (or ConfirmDialog, RouteModal) instead of a hand-made dialog').toEqual([]);
+  });
+});

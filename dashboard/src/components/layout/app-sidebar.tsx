@@ -88,11 +88,17 @@ export function AppSidebar({ session }: AppSidebarProps) {
     resolvePlaceholders(path, resolved.projectName) === herePath;
 
   // The list scrolls on a short window; the marked entry is kept in view when the route changes.
+  // Only the list is scrolled, by hand: `scrollIntoView` also scrolls every ancestor, the fixed
+  // shell included, and moves the point the next Tab starts from.
   const navRef = useRef<HTMLElement>(null);
   useEffect(() => {
-    navRef.current
-      ?.querySelector<HTMLElement>('[aria-current="page"]')
-      ?.scrollIntoView?.({ block: 'nearest' });
+    const nav = navRef.current;
+    const here = nav?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!nav || !here) return;
+    const list = nav.getBoundingClientRect();
+    const row = here.getBoundingClientRect();
+    if (row.top < list.top) nav.scrollTop -= list.top - row.top;
+    else if (row.bottom > list.bottom) nav.scrollTop += row.bottom - list.bottom;
   }, [location.pathname]);
 
   // T5.3: View Transitions API wraps navigation — smooth crossfade entre

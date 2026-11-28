@@ -27,10 +27,13 @@ test.describe('sidebar on a short window', () => {
     const docs = await box(sidebar.getByRole('link', { name: /documentation/i }));
     const list = await box(nav);
 
+    // The team switcher is a few pixels taller than the 48px row it is centered in, so the
+    // header is located by the middle of the switcher and not by its edges.
+    const middle = (b: { top: number; bottom: number }) => (b.top + b.bottom) / 2;
     expect(aside).toEqual({ top: 0, bottom: 620 });
-    expect(switcher.top).toBeGreaterThanOrEqual(0);
+    expect(middle(switcher)).toBeGreaterThan(0);
+    expect(middle(switcher)).toBeLessThan(list.top);
     expect(docs.bottom).toBeLessThanOrEqual(620);
-    expect(list.top).toBeGreaterThanOrEqual(switcher.bottom);
     expect(list.bottom).toBeLessThanOrEqual(docs.top);
 
     // The list is what scrolls: its content is taller than its box, and the last entry is

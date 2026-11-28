@@ -97,8 +97,10 @@ export function AppSidebar({ session }: AppSidebarProps) {
     if (!nav || !here) return;
     const list = nav.getBoundingClientRect();
     const row = here.getBoundingClientRect();
+    // The last 24px of the list are under the fade, so the entry is brought clear of it.
+    const clear = 32;
     if (row.top < list.top) nav.scrollTop -= list.top - row.top;
-    else if (row.bottom > list.bottom) nav.scrollTop += row.bottom - list.bottom;
+    else if (row.bottom > list.bottom - clear) nav.scrollTop += row.bottom - (list.bottom - clear);
   }, [location.pathname]);
 
   // T5.3: View Transitions API wraps navigation — smooth crossfade entre

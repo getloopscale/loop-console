@@ -52,12 +52,12 @@ test.describe('Observability — as telas do lens renderizam (runtime de navegad
 
     await page.goto('/observability');
     // O menu do lens está presente antes de qualquer clique.
-    await expect(page.getByRole('button', { name: /^Traces$/ })).toBeVisible();
+    await expect(page.getByRole('complementary').getByRole('link', { name: /^Traces$/ })).toBeVisible();
 
     for (const cap of LENS_CAPABILITIES) {
       // `Overview` já é a tela em que se está; as demais alcançam-se CLICANDO.
       if (cap.path !== '/observability') {
-        await page.getByRole('button', { name: new RegExp(`^${cap.label}$`) }).click();
+        await page.getByRole('complementary').getByRole('link', { name: new RegExp(`^${cap.label}$`) }).click();
       }
 
       await expect(page).toHaveURL(new RegExp(`${cap.path.replace(/\//g, '\\/')}$`));

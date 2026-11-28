@@ -27,7 +27,7 @@ describe('AppSidebar navigation (F-4)', () => {
 
   it('navigates with PLAIN react-router navigate (no view transition) on sub-nav click', () => {
     render(<AppSidebar session={makeSession()} />);
-    fireEvent.click(screen.getByRole('button', { name: /Projects/i }));
+    fireEvent.click(screen.getByRole('link', { name: /Projects/i }));
     // PLAIN navigate — path only, NO viewTransition option (F-4 correction).
     expect(navigateSpy).toHaveBeenCalledWith('/projects');
     expect(navigateSpy.mock.calls[0]).toHaveLength(1);

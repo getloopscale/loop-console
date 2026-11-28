@@ -33,11 +33,11 @@ test.describe('M14 — a jornada do playground', () => {
     await page.goto('/');
 
     // --- 1. chegar à capacidade pelo MENU ---
-    await page.getByRole('button', { name: 'Prompts', exact: true }).click();
+    await page.getByRole('complementary').getByRole('link', { name: 'Prompts', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Prompts', level: 1 })).toBeVisible();
 
     // --- 2. chegar ao catálogo pelo submenu ---
-    await page.getByRole('button', { name: 'Catalog', exact: true }).click();
+    await page.getByRole('complementary').getByRole('link', { name: 'Catalog', exact: true }).click();
     await expect(
       page.getByRole('heading', { name: /prompt catalog/i, level: 1 }),
     ).toBeVisible();
@@ -91,8 +91,8 @@ test.describe('M14 — a jornada do playground', () => {
     // este prompt — sem o link de volta, a tela seria uma sala sem porta.
     await page.goto('/');
 
-    await page.getByRole('button', { name: 'Prompts', exact: true }).click();
-    await page.getByRole('button', { name: 'Catalog', exact: true }).click();
+    await page.getByRole('complementary').getByRole('link', { name: 'Prompts', exact: true }).click();
+    await page.getByRole('complementary').getByRole('link', { name: 'Catalog', exact: true }).click();
     await page.getByRole('link', { name: 'saudacao', exact: true }).click();
     await page.getByRole('link', { name: 'Playground' }).click();
     await expect(page.getByRole('heading', { name: /Playground — saudacao/i })).toBeVisible();

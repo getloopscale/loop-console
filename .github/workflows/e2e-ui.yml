@@ -168,7 +168,8 @@ jobs:
             e2e/dashboard-m12-fase-a-bundle-grep-migration.spec.ts \
             e2e/modal-visual-baseline.spec.ts \
             e2e/project-connect.spec.ts \
-            e2e/no-browser-token.spec.ts
+            e2e/no-browser-token.spec.ts \
+            e2e/sidebar-layout.spec.ts
 
       # O relatório só interessa quando algo falha; guardá-lo sempre encheria o storage do repo
       # com artefatos de runs verdes que ninguém abre.

@@ -32,7 +32,7 @@ import { test, expect, type Page } from '@playwright/test';
  */
 async function navegarAteOAcervoPeloMenu(page: Page) {
   await page.goto('/');
-  await page.getByRole('button', { name: /^skills$/i }).click();
+  await page.getByRole('complementary').getByRole('link', { name: /^skills$/i }).click();
 
   // ESPERA DETERMINÍSTICA entre os dois cliques, e ela não é zelo: `Overview` existe nos DOIS
   // menus. Sem esperar o submenu abrir, sob carga o clique cai no `Overview` da RAIZ e navega
@@ -41,7 +41,7 @@ async function navegarAteOAcervoPeloMenu(page: Page) {
   // estados. Um `waitForTimeout` aqui esconderia a corrida em vez de eliminá-la.
   await expect(page.getByRole('button', { name: /back to loopscale/i })).toBeVisible();
 
-  await page.getByRole('button', { name: /^overview$/i }).click();
+  await page.getByRole('complementary').getByRole('link', { name: /^overview$/i }).click();
   await expect(page).toHaveURL(/\/skills$/);
 
   // A URL não é o acervo — é só o endereço dele. Sem esperar a PRIMEIRA LINHA renderizar, quem
@@ -162,8 +162,8 @@ test.describe('M26 — navegar o registro de skills pelo dashboard', () => {
     await page.getByRole('link', { name: 'Review pull request' }).click();
 
     // Itens que só a RAIZ tem: se eles reaparecem, o menu voltou para a raiz.
-    await expect(page.getByRole('button', { name: /^domains$/i })).toHaveCount(0);
-    await expect(page.getByRole('button', { name: /^overview$/i })).toBeVisible();
+    await expect(page.getByRole('complementary').getByRole('link', { name: /^domains$/i })).toHaveCount(0);
+    await expect(page.getByRole('complementary').getByRole('link', { name: /^overview$/i })).toBeVisible();
   });
 
   test('a recusa tipada do registro chega como diagnóstico, não como "erro ao carregar"', async ({
@@ -193,10 +193,10 @@ test.describe('M26 — navegar o registro de skills pelo dashboard', () => {
 
 async function navegarAteOsPacotesPeloMenu(page: Page) {
   await page.goto('/');
-  await page.getByRole('button', { name: /^skills$/i }).click();
+  await page.getByRole('complementary').getByRole('link', { name: /^skills$/i }).click();
   await expect(page.getByRole('button', { name: /back to loopscale/i })).toBeVisible();
 
-  await page.getByRole('button', { name: /^distribution$/i }).click();
+  await page.getByRole('complementary').getByRole('link', { name: /^distribution$/i }).click();
   await expect(page).toHaveURL(/\/bundles$/);
 
   // Espera a primeira linha, não só a URL: quem clicar em seguida competiria com a carga.
@@ -365,9 +365,9 @@ test.describe('M31 — descoberta observável: score E qual perna casou', () => 
     // A razão de existir do produto — um agente achar a skill certa por intenção — não tinha
     // tela alguma até este milestone. A auditoria de 2026-08-03 mediu isso navegando por clique.
     await page.goto('/');
-    await page.getByRole('button', { name: /^skills$/i }).click();
+    await page.getByRole('complementary').getByRole('link', { name: /^skills$/i }).click();
     await expect(page.getByRole('button', { name: /back to loopscale/i })).toBeVisible();
-    await page.getByRole('button', { name: /^discovery$/i }).click();
+    await page.getByRole('complementary').getByRole('link', { name: /^discovery$/i }).click();
     await expect(page).toHaveURL(/\/skills\/discovery$/);
 
     // O submenu continua aberto: `/skills/discovery` depende da mesma linha de
@@ -397,9 +397,9 @@ test.describe('M31 — descoberta observável: score E qual perna casou', () => 
     // É o comportamento que o M32 promete e que nenhuma tela permitia verificar: a descoberta
     // esconde deprecadas por padrão. Sem o filtro, o operador teria de confiar na documentação.
     await page.goto('/');
-    await page.getByRole('button', { name: /^skills$/i }).click();
+    await page.getByRole('complementary').getByRole('link', { name: /^skills$/i }).click();
     await expect(page.getByRole('button', { name: /back to loopscale/i })).toBeVisible();
-    await page.getByRole('button', { name: /^discovery$/i }).click();
+    await page.getByRole('complementary').getByRole('link', { name: /^discovery$/i }).click();
 
     await page.getByLabel('Natural-language query').fill('currency');
     await page.getByRole('button', { name: /^search$/i }).click();
@@ -484,9 +484,9 @@ test.describe('M31 — autoria sem publicar às cegas', () => {
     // `field`/`line` — e ela ficou SEM CONSUMIDOR: nada disso alcançava um autor, porque não
     // havia tela de autoria.
     await page.goto('/');
-    await page.getByRole('button', { name: /^skills$/i }).click();
+    await page.getByRole('complementary').getByRole('link', { name: /^skills$/i }).click();
     await expect(page.getByRole('button', { name: /back to loopscale/i })).toBeVisible();
-    await page.getByRole('button', { name: /^new skill$/i }).click();
+    await page.getByRole('complementary').getByRole('link', { name: /^new skill$/i }).click();
     await expect(page).toHaveURL(/\/skills\/new$/);
 
     // Publicar exige ter validado antes — é o que impede publicar às cegas, e a tela ensina a
@@ -524,9 +524,9 @@ test.describe('M31 — autoria sem publicar às cegas', () => {
     // registro sempre aceitou o zip (a CLI publica assim desde o M12); a TELA só tinha textarea,
     // então quem escrevia uma skill com script precisava de terminal para publicá-la.
     await page.goto('/');
-    await page.getByRole('button', { name: /^skills$/i }).click();
+    await page.getByRole('complementary').getByRole('link', { name: /^skills$/i }).click();
     await expect(page.getByRole('button', { name: /back to loopscale/i })).toBeVisible();
-    await page.getByRole('button', { name: /^new skill$/i }).click();
+    await page.getByRole('complementary').getByRole('link', { name: /^new skill$/i }).click();
 
     // O caminho precisa ser DESCOBRÍVEL na própria tela: quem chega ali com uma pasta na mão tem
     // de ver que existe forma de enviá-la, sem ler documentação.
@@ -571,9 +571,9 @@ test.describe('M31 — autoria sem publicar às cegas', () => {
     // É a mesma classe de defeito que esta capacidade já pagou várias vezes: um verde afirmando
     // um sucesso que não é o que está na tela.
     await page.goto('/');
-    await page.getByRole('button', { name: /^skills$/i }).click();
+    await page.getByRole('complementary').getByRole('link', { name: /^skills$/i }).click();
     await expect(page.getByRole('button', { name: /back to loopscale/i })).toBeVisible();
-    await page.getByRole('button', { name: /^new skill$/i }).click();
+    await page.getByRole('complementary').getByRole('link', { name: /^new skill$/i }).click();
 
     await page.getByRole('button', { name: /validate without publishing/i }).click();
     await expect(page.getByText(/nothing published yet/i)).toBeVisible();
@@ -596,9 +596,9 @@ test.describe('M31 — autoria sem publicar às cegas', () => {
   test('editar o conteúdo invalida a validação anterior', async ({ page }) => {
     // Exibir "válido" sobre um texto que mudou afirmaria algo que ninguém verificou.
     await page.goto('/');
-    await page.getByRole('button', { name: /^skills$/i }).click();
+    await page.getByRole('complementary').getByRole('link', { name: /^skills$/i }).click();
     await expect(page.getByRole('button', { name: /back to loopscale/i })).toBeVisible();
-    await page.getByRole('button', { name: /^new skill$/i }).click();
+    await page.getByRole('complementary').getByRole('link', { name: /^new skill$/i }).click();
 
     await page.getByRole('button', { name: /validate without publishing/i }).click();
     await expect(page.getByText(/nothing published yet/i)).toBeVisible();
@@ -612,9 +612,9 @@ test.describe('M31 — autoria sem publicar às cegas', () => {
 test.describe('M33 — catálogo: ver o que existe sem saber o que procurar', () => {
   async function irAoCatalogo(page: Page) {
     await page.goto('/');
-    await page.getByRole('button', { name: /^skills$/i }).click();
+    await page.getByRole('complementary').getByRole('link', { name: /^skills$/i }).click();
     await expect(page.getByRole('button', { name: /back to loopscale/i })).toBeVisible();
-    await page.getByRole('button', { name: /^catalog$/i }).click();
+    await page.getByRole('complementary').getByRole('link', { name: /^catalog$/i }).click();
     await expect(page).toHaveURL(/\/skills\/catalog$/);
   }
 
@@ -682,9 +682,9 @@ test.describe('M34 — descobribilidade diagnosticada no momento da autoria', ()
     // O critério: rodar no momento da autoria. Depois de publicar, corrigir a descrição custa
     // uma revisão nova; aqui o texto ainda está na mão do autor.
     await page.goto('/');
-    await page.getByRole('button', { name: /^skills$/i }).click();
+    await page.getByRole('complementary').getByRole('link', { name: /^skills$/i }).click();
     await expect(page.getByRole('button', { name: /back to loopscale/i })).toBeVisible();
-    await page.getByRole('button', { name: /^new skill$/i }).click();
+    await page.getByRole('complementary').getByRole('link', { name: /^new skill$/i }).click();
 
     // O diagnóstico só aparece depois de validar: sem `name`/`description` lidos do frontmatter
     // não há o que diagnosticar.
@@ -714,9 +714,9 @@ test.describe('M34 — descobribilidade diagnosticada no momento da autoria', ()
     // as que o autor podia corrigir ali mesmo. Ele perguntava "minha descrição está boa?" e a tela
     // respondia sobre outra coisa.
     await page.goto('/');
-    await page.getByRole('button', { name: /^skills$/i }).click();
+    await page.getByRole('complementary').getByRole('link', { name: /^skills$/i }).click();
     await expect(page.getByRole('button', { name: /back to loopscale/i })).toBeVisible();
-    await page.getByRole('button', { name: /^new skill$/i }).click();
+    await page.getByRole('complementary').getByRole('link', { name: /^new skill$/i }).click();
 
     // Descrição LONGA de propósito: acima do piso, para que a única causa candidata a aparecer
     // fosse a falta de vetor. Com descrição curta o teste passaria por acidente.
@@ -800,9 +800,9 @@ test.describe('M35 — a cadeia bundle → skill → canal é navegável', () =>
 
   async function irAoPacoteComItens(page: Page) {
     await page.goto('/');
-    await page.getByRole('button', { name: /^skills$/i }).click();
+    await page.getByRole('complementary').getByRole('link', { name: /^skills$/i }).click();
     await expect(page.getByRole('button', { name: /back to loopscale/i })).toBeVisible();
-    await page.getByRole('button', { name: /^distribution$/i }).click();
+    await page.getByRole('complementary').getByRole('link', { name: /^distribution$/i }).click();
     await page.getByRole('link', { name: 'Support skills' }).click();
   }
 

@@ -23,14 +23,14 @@ test.describe('Dashboard — Knowledge Base (RAG) journeys', () => {
   test('sidebar exposes the renamed "Knowledge Base" capability and drills into it', async ({ page }) => {
     await page.goto('/');
     // The capability item was renamed RAG → Knowledge Base (kept the /rag route). It drills into a
-    // submenu, so it renders as a button, not a link — match by text.
+    // submenu. It is a link of the sidebar; the Overview grid has a card of the same name.
     const kbItem = page.getByText('Knowledge Base', { exact: true }).first();
     await expect(kbItem).toBeVisible();
     await kbItem.click();
     await expect(page).toHaveURL(/\/rag$/);
-    // The drill-in submenu exposes the Knowledge Base sub-pages (rendered as buttons that navigate).
+    // The drill-in submenu exposes the Knowledge Base sub-pages (links of the sidebar).
     for (const { label } of KB_PAGES) {
-      await expect(page.getByRole('button', { name: new RegExp(`^${label}$`, 'i') }).first()).toBeVisible();
+      await expect(page.getByRole('complementary').getByRole('link', { name: new RegExp(`^${label}$`, 'i') })).toBeVisible();
     }
   });
 

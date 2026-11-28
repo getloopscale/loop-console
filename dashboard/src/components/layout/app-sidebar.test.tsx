@@ -28,7 +28,7 @@ describe('AppSidebar', () => {
       'Settings',
       'Profile',
     ]) {
-      expect(screen.getByRole('button', { name: new RegExp(label, 'i') })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: new RegExp(label, 'i') })).toBeInTheDocument();
     }
     // "Team" nav item collides with the TeamSwitcher "Switch team" button label.
     // Verify via the more-specific item-by-link-text query.
@@ -38,7 +38,7 @@ describe('AppSidebar', () => {
 
   it('test_app_sidebar_active_item_matches_current_route', () => {
     render(<AppSidebar session={makeSession()} />, { initialEntries: ['/projects'] });
-    const projectsButton = screen.getByRole('button', { name: /Projects/i });
+    const projectsButton = screen.getByRole('link', { name: /Projects/i });
     // The item the user is in is a lighter row with a bar in the brand color on its left. The
     // brand color marks it; it does not paint the label.
     expect(projectsButton.className).toMatch(/(^|\s)bg-muted(\s|$)/);
@@ -79,7 +79,7 @@ describe('AppSidebar', () => {
       expect(screen.getByText(label)).toBeInTheDocument();
     }
     // paths are unchanged (the grouping is data-only) — the Traces item still navigates the same route.
-    expect(screen.getByRole('button', { name: /traces/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /traces/i })).toBeInTheDocument();
     // (the workspace switcher lives in the root sidebar view — untouched by this data-only regrouping;
     //  it is covered by test_app_sidebar_team_switcher_renders_session_name.)
   });
@@ -111,7 +111,7 @@ describe('AppSidebar', () => {
     // errado, sem erro algum. Aqui a asserção é sobre a RAIZ, porque é dali que o usuário parte.
     render(<AppSidebar session={makeSession()} />, { initialEntries: ['/'] });
 
-    expect(screen.getByRole('button', { name: /^skills$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^skills$/i })).toBeInTheDocument();
   });
 
   it('a RAIZ mostra Sandboxes e Projects — o par que dá sentido às ausências abaixo', () => {
@@ -171,7 +171,7 @@ describe('AppSidebar', () => {
   it('opens the project menu on the domains page, with Domains under Settings', () => {
     render(<AppSidebar session={makeSession()} />, { initialEntries: ['/projects/hello/domains'] });
 
-    expect(screen.getByRole('button', { name: 'Domains' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('link', { name: 'Domains' })).toHaveAttribute('aria-current', 'page');
     expect(screen.getByText('Production checklist')).toBeInTheDocument();
   });
 
@@ -180,7 +180,7 @@ describe('AppSidebar', () => {
     // por `curl`, SDK ou MCP. A asserção é sobre a RAIZ, porque é dali que o usuário parte.
     render(<AppSidebar session={makeSession()} />, { initialEntries: ['/'] });
 
-    expect(screen.getByRole('button', { name: /^prompts$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^prompts$/i })).toBeInTheDocument();
   });
 
   it('M25 — uma rota /promptly abre o submenu promptly, e não a raiz', () => {
@@ -246,9 +246,69 @@ describe('menu — capacidades do data plane', () => {
 
     for (const label of ['Memory', 'Knowledge Base', 'Workspace', 'Observability', 'Trust']) {
       expect(
-        screen.getByRole('button', { name: label }),
+        screen.getByRole('link', { name: label }),
         `a capacidade ${label} não tem entrada no menu: as rotas dela existem e ninguém as alcança`,
       ).toBeInTheDocument();
     }
+  });
+});
+
+describe('sidebar layout and wayfinding', () => {
+  it('keeps the header and the footer outside the region that scrolls', () => {
+    // Found on staging at 937px of height: the root menu is taller than the window, the whole
+    // sidebar scrolled, the team switcher left the screen and the footer was drawn past the end
+    // of the sidebar. Only the list of entries may scroll.
+    render(<AppSidebar session={makeSession()} />, { initialEntries: ['/'] });
+
+    const nav = screen.getByRole('navigation', { name: 'LoopScale' });
+    expect(nav.className).toMatch(/(^|\s)overflow-y-auto(\s|$)/);
+    expect(nav.className).toMatch(/(^|\s)min-h-0(\s|$)/);
+    expect(nav).toContainElement(screen.getByRole('link', { name: 'Projects' }));
+
+    const docs = screen.getByRole('link', { name: /Documentation/ });
+    const switcher = screen.getByRole('button', { name: /Switch team/i });
+    expect(nav.contains(docs)).toBe(false);
+    expect(nav.contains(switcher)).toBe(false);
+    expect(nav.contains(screen.getByRole('searchbox', { name: 'Find a project' }))).toBe(false);
+  });
+
+  it('names the scrolling region after the menu that is open', () => {
+    render(<AppSidebar session={makeSession()} />, { initialEntries: ['/sandboxes'] });
+    expect(screen.getByRole('navigation', { name: 'Sandboxes' })).toBeInTheDocument();
+  });
+
+  it('renders every entry as a link to its route, so it opens in a new tab', () => {
+    render(<AppSidebar session={makeSession()} />, { initialEntries: ['/projects/acme-web'] });
+
+    expect(screen.getByRole('link', { name: 'Secrets' })).toHaveAttribute('href', '/projects/acme-web/secrets');
+    expect(screen.getByRole('link', { name: 'Overview' })).toHaveAttribute('href', '/projects/acme-web');
+  });
+
+  it.each([
+    ['/sandboxes/sbx_open01', 'Sandboxes'],
+    ['/rag/collections/col_1', 'Collections'],
+    ['/skills/skill_1', 'Overview'],
+    ['/projects/acme-web/deployments/dep_1', 'Deployments'],
+    ['/projects/acme-web', 'Overview'],
+  ])('marks where the user is on %s', (route, label) => {
+    // A submenu used to mark an entry on an exact match only, so the page of one sandbox, one
+    // collection or one deployment left the whole menu unmarked.
+    render(<AppSidebar session={makeSession()} />, { initialEntries: [route] });
+
+    const current = screen.getAllByRole('link').filter((l) => l.getAttribute('aria-current') === 'page');
+    expect(current.map((l) => l.textContent?.trim())).toEqual([label]);
+  });
+
+  it('marks a single entry of the root menu', () => {
+    render(<AppSidebar session={makeSession()} />, { initialEntries: ['/projects'] });
+    const current = screen.getAllByRole('link').filter((l) => l.getAttribute('aria-current') === 'page');
+    expect(current.map((l) => l.textContent?.trim())).toEqual(['Projects']);
+  });
+
+  it('says that Documentation leaves the console', () => {
+    render(<AppSidebar session={makeSession()} />, { initialEntries: ['/'] });
+    const docs = screen.getByRole('link', { name: /Documentation/ });
+    expect(docs).toHaveAttribute('target', '_blank');
+    expect(docs).toHaveAccessibleName('Documentation (opens in a new tab)');
   });
 });

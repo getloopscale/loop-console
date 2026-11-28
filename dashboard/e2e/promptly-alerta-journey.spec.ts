@@ -24,8 +24,8 @@ import { test, expect, type Page } from '@playwright/test';
 /** Chega à tela de alertas pelo MENU, a partir da raiz — nunca pelo endereço. */
 async function navegarAteAlertasPeloMenu(page: Page) {
   await page.goto('/');
-  await page.getByRole('button', { name: /^observability$/i }).click();
-  await page.getByRole('button', { name: /^alerts$/i }).click();
+  await page.getByRole('complementary').getByRole('link', { name: /^observability$/i }).click();
+  await page.getByRole('complementary').getByRole('link', { name: /^alerts$/i }).click();
   await expect(page).toHaveURL(/\/observability\/alerts$/);
 }
 
@@ -81,9 +81,9 @@ test.describe('M22 — o monitor de prompt pela tela', () => {
 
   test('a aba de produção leva ao monitor, e o destino JÁ VEM preenchido', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: /^prompts$/i }).click();
-    await expect(page.getByRole('button', { name: /^projects$/i })).toHaveCount(0);
-    await page.getByRole('button', { name: /^catalog$/i }).click();
+    await page.getByRole('complementary').getByRole('link', { name: /^prompts$/i }).click();
+    await expect(page.getByRole('complementary').getByRole('link', { name: /^projects$/i })).toHaveCount(0);
+    await page.getByRole('complementary').getByRole('link', { name: /^catalog$/i }).click();
 
     await page.getByRole('link', { name: 'saudacao', exact: true }).click();
     await page.getByRole('link', { name: 'Production usage' }).click();

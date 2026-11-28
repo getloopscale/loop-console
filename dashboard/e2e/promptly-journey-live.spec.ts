@@ -69,8 +69,8 @@ test.describe('M25 — a jornada contra a instância implantada', () => {
 
       // ── NAVEGAÇÃO POR CLIQUE. Digitar a URL é o único caminho que o operador não
       // tem; um spec que faz goto na rota profunda fica verde com o menu quebrado.
-      await page.getByRole('button', { name: /^prompts$/i }).click();
-      await expect(page.getByRole('button', { name: /^projects$/i })).toHaveCount(0);
+      await page.getByRole('complementary').getByRole('link', { name: /^prompts$/i }).click();
+      await expect(page.getByRole('complementary').getByRole('link', { name: /^projects$/i })).toHaveCount(0);
       await expect(page).toHaveURL(/\/promptly$/);
 
       // ── CATÁLOGO: conteúdo, não status. Uma tabela vazia servida com 200 é o modo

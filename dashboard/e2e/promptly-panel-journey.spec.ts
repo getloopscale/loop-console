@@ -33,7 +33,7 @@ test.describe('M13 — a jornada do painel de prompts', () => {
     // A entrada da capacidade é um BOTÃO de drill-in (`drillsInto: 'promptly'`) que abre o
     // submenu E navega para a raiz; os itens do submenu também são botões, não links. Medido no
     // snapshot da própria jornada — eu havia suposto links, e é para isso que este e2e existe.
-    await page.getByRole('button', { name: 'Prompts', exact: true }).click();
+    await page.getByRole('complementary').getByRole('link', { name: 'Prompts', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Prompts', level: 1 })).toBeVisible();
 
     // O painel responde a pergunta que a lista não responde.
@@ -72,8 +72,8 @@ test.describe('M13 — a jornada do painel de prompts', () => {
     // precisa reconhecer a rota para o submenu ABRIR. Este teste falha se ela sumir.
     await page.goto('/');
 
-    await page.getByRole('button', { name: 'Prompts', exact: true }).click();
-    await page.getByRole('button', { name: 'Catalog', exact: true }).click();
+    await page.getByRole('complementary').getByRole('link', { name: 'Prompts', exact: true }).click();
+    await page.getByRole('complementary').getByRole('link', { name: 'Catalog', exact: true }).click();
 
     await expect(page.getByRole('heading', { name: /prompt catalog/i, level: 1 })).toBeVisible();
   });

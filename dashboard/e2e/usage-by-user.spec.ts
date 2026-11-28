@@ -43,8 +43,8 @@ test.describe('M142 — o consumo por end-user alcançado pelo produto', () => {
     // capacidade, com três rodadas de validação passando por cima porque validavam digitando.
     await page.goto('/');
 
-    await page.getByRole('button', { name: /^Observability$/ }).click();
-    await page.getByRole('button', { name: /^Usage by user$/ }).click();
+    await page.getByRole('complementary').getByRole('link', { name: /^Observability$/ }).click();
+    await page.getByRole('complementary').getByRole('link', { name: /^Usage by user$/ }).click();
 
     await expect(page).toHaveURL(/\/observability\/usage-by-user$/);
     await expect(page.getByRole('heading', { name: /usage by user/i }).first()).toBeVisible();

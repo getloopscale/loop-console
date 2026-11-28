@@ -29,11 +29,11 @@ test.describe('M15 — a jornada do uso por revisão', () => {
     // O ÚNICO goto do arquivo.
     await page.goto('/');
 
-    await page.getByRole('button', { name: 'Prompts', exact: true }).click();
+    await page.getByRole('complementary').getByRole('link', { name: 'Prompts', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Prompts', level: 1 })).toBeVisible();
 
     // Do painel para o catálogo, pelo submenu — não pela URL.
-    await page.getByRole('button', { name: /catalog/i }).click();
+    await page.getByRole('complementary').getByRole('link', { name: /catalog/i }).click();
     await expect(page.getByRole('heading', { name: /prompt catalog/i, level: 1 })).toBeVisible();
 
     // E do catálogo para o detalhe, clicando no prompt. O título da tela É o nome do prompt —
@@ -71,8 +71,8 @@ test.describe('M15 — a jornada do uso por revisão', () => {
     await page.addInitScript(() => sessionStorage.setItem('__mock_uso', 'indisponivel'));
 
     await page.goto('/');
-    await page.getByRole('button', { name: 'Prompts', exact: true }).click();
-    await page.getByRole('button', { name: /catalog/i }).click();
+    await page.getByRole('complementary').getByRole('link', { name: 'Prompts', exact: true }).click();
+    await page.getByRole('complementary').getByRole('link', { name: /catalog/i }).click();
     await page.getByRole('link', { name: 'saudacao' }).first().click();
 
     await expect(page.getByRole('heading', { name: 'saudacao', level: 1 })).toBeVisible();

@@ -15,7 +15,7 @@ test.describe('LoopScale dashboard — 6 critical journeys', () => {
     await page.goto('/');
     await expect(page.getByRole('heading', { name: /overview/i })).toBeVisible();
 
-    await page.getByRole('button', { name: /projects/i }).click();
+    await page.getByRole('complementary').getByRole('link', { name: /projects/i }).click();
     await expect(page).toHaveURL(/\/projects$/);
     await expect(page.getByText('acme-web')).toBeVisible();
 

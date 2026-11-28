@@ -43,12 +43,12 @@ import { test, expect, type Page } from '@playwright/test';
  */
 async function navegarAteOCatalogoPeloMenu(page: Page) {
   await page.goto('/');
-  await page.getByRole('button', { name: /^prompts$/i }).click();
+  await page.getByRole('complementary').getByRole('link', { name: /^prompts$/i }).click();
   // Esperar o submenu TROCAR antes de clicar no item dele. A raiz também tem itens de mesmo
   // nome: clicar cedo demais acerta o da raiz e a jornada continua em `/`, com a navegação
   // parecendo funcionar. O sinal de troca é a ausência de um item que só a raiz tem.
-  await expect(page.getByRole('button', { name: /^projects$/i })).toHaveCount(0);
-  await page.getByRole('button', { name: /^catalog$/i }).click();
+  await expect(page.getByRole('complementary').getByRole('link', { name: /^projects$/i })).toHaveCount(0);
+  await page.getByRole('complementary').getByRole('link', { name: /^catalog$/i }).click();
   await expect(page).toHaveURL(/\/promptly\/catalog$/);
 }
 

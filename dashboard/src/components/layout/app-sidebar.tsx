@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   BookOpen,
   ChevronRight,
+  ExternalLink,
+  RotateCcw,
   Search,
 } from 'lucide-react';
 import { Input, Sidebar } from '@getloopscale/ui';
@@ -18,6 +20,7 @@ import {
   type MenuDefinition,
   type MenuItem,
 } from './app-sidebar-menus';
+import { activeItemPath } from './active-menu-item';
 
 interface AppSidebarProps {
   session: Session;
@@ -79,24 +82,39 @@ export function AppSidebar({ session }: AppSidebarProps) {
   const userName =
     session.identity.traits.name ?? session.identity.traits.email;
 
-  const isActive = (path: string) => {
-    // Resolve placeholders in the target path (so /projects/{project}/secrets
-    // becomes /projects/acme-web/secrets for matching)
-    const resolvedPath = resolvePlaceholders(path, resolved.projectName);
-    if (resolvedPath === '/') return location.pathname === '/';
-    // Submenu items: exact match only (else "General" /settings would also light
-    // up when on /settings/members because startsWith would match)
-    if (activeMenu.id !== 'main') {
-      return location.pathname === resolvedPath;
-    }
-    return location.pathname.startsWith(resolvedPath);
-  };
+  // One entry is marked: the one whose route is the longest that contains the current one.
+  const herePath = activeItemPath(activeMenu, location.pathname, resolved.projectName);
+  const isActive = (path: string) =>
+    resolvePlaceholders(path, resolved.projectName) === herePath;
+
+  // The list scrolls on a short window; the marked entry is kept in view when the route changes.
+  // Only the list is scrolled, by hand: `scrollIntoView` also scrolls every ancestor, the fixed
+  // shell included, and moves the point the next Tab starts from.
+  const navRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const nav = navRef.current;
+    const here = nav?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!nav || !here) return;
+    const list = nav.getBoundingClientRect();
+    const row = here.getBoundingClientRect();
+    // The last 24px of the list are under the fade, so the entry is brought clear of it.
+    const clear = 32;
+    if (row.top < list.top) nav.scrollTop -= list.top - row.top;
+    else if (row.bottom > list.bottom - clear) nav.scrollTop += row.bottom - (list.bottom - clear);
+  }, [location.pathname]);
 
   // T5.3: View Transitions API wraps navigation — smooth crossfade entre
   // menus em browsers que suportam (Chrome 111+/Safari 18+). Firefox cai
   // no fallback (chamada síncrona, sem animação extra), keyframes CSS
   // existentes continuam funcionando.
-  const handleItemClick = (item: MenuItem) => {
+  const handleItemClick = (event: MouseEvent<HTMLElement>, item: MenuItem) => {
+    // Every entry is an anchor with its route as `href`. A click with a modifier key, or with
+    // another button, is left to the browser: new tab, new window, download. The plain click is
+    // taken here, because following the href would reload the page and drop the session.
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+      return;
+    }
+    event.preventDefault();
     const resolvedPath = resolvePlaceholders(item.path, resolved.projectName);
     // PLAIN navigate — NO View Transition (live-test-gaps-fix F-4, corrected after
     // live verification). The sub-nav routes are lazy + Suspense with no Outlet;
@@ -180,20 +198,27 @@ export function AppSidebar({ session }: AppSidebarProps) {
        * as uppercase subheading; untitled groups separate visually via section
        * spacing without a label (the "footer-nav" pattern: Settings/Profile
        * clustered apart from main nav without needing a heading). */}
+      <nav
+        ref={navRef}
+        aria-label={resolvedTitle}
+        className="nav-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain pb-6"
+      >
       {menu.groups.map((group, groupIndex) => (
         <Sidebar.Section
           key={`${menu.id}-group-${groupIndex}`}
           title={group.title}
+          className="gap-0.5 py-2.5"
         >
           {group.items.map((item) => {
             const Icon = item.icon;
             return (
               <Sidebar.Item
                 key={item.path + ':' + item.label}
-                as="button"
+                as="a"
+                href={resolvePlaceholders(item.path, resolved.projectName)}
                 active={isActive(item.path)}
                 className={`${NAV_ROW} ${isActive(item.path) ? NAV_HERE : ''}`}
-                onClick={() => handleItemClick(item)}
+                onClick={(event: MouseEvent<HTMLElement>) => handleItemClick(event, item)}
                 title={
                   resolvePlaceholders(item.label, resolved.projectName) +
                   (item.comingSoon ? ' — coming soon' : '')
@@ -234,6 +259,13 @@ export function AppSidebar({ session }: AppSidebarProps) {
           })}
         </Sidebar.Section>
       ))}
+        {/* The scrollbar of the list is hidden, so this fade is what says there is more below. It
+         * sits over the padding under the last group and is scrolled past at the end. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none sticky bottom-0 -mt-6 h-6 bg-gradient-to-t from-card to-transparent"
+        />
+      </nav>
     </>
   );
 
@@ -261,37 +293,35 @@ export function AppSidebar({ session }: AppSidebarProps) {
         }
       `}</style>
       <Sidebar>
-        <div key={activeMenuId} className={`flex flex-col h-full ${slideClass}`}>
+        <div key={activeMenuId} className={`flex h-full min-h-0 flex-col ${slideClass}`}>
           {renderPanel(activeMenu)}
 
-          <Sidebar.Footer className="mt-auto border-t border-border/60">
-            <div className="px-3 py-3 space-y-2">
-              <a
-                href="https://docs.getloopscale.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-body-sm text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+          <Sidebar.Footer className="shrink-0 border-t border-border/60 px-3 py-2">
+            <a
+              href="https://docs.getloopscale.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Documentation (opens in a new tab)"
+              className={`flex items-center ${NAV_ROW} text-muted-foreground`}
+            >
+              <BookOpen className="size-4 shrink-0 opacity-80" aria-hidden="true" />
+              <span className="min-w-0 flex-1 truncate">Documentation</span>
+              <ExternalLink className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+            </a>
+            {/* Shown once the onboarding panel was dismissed; replay() resets it. */}
+            {onboardingState.dismissed && (
+              <button
+                type="button"
+                onClick={() => {
+                  replayOnboarding();
+                  reportEvent('onboarding_replayed');
+                }}
+                className={`flex w-full items-center ${NAV_ROW} text-muted-foreground`}
               >
-                <BookOpen className="size-3.5 shrink-0" aria-hidden="true" />
-                <span>Documentation</span>
-              </a>
-              {/* Sprint 3 T3.6: Replay onboarding link — visible only when
-                  user dismissed widget. EC-06 ensures replay() works even when
-                  all steps complete (resets DEFAULT_STATE). */}
-              {onboardingState.dismissed && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    replayOnboarding();
-                    reportEvent('onboarding_replayed');
-                  }}
-                  className="flex items-center gap-2 text-body-sm text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
-                >
-                  <BookOpen className="size-3.5 shrink-0" aria-hidden="true" />
-                  <span>Replay onboarding</span>
-                </button>
-              )}
-            </div>
+                <RotateCcw className="size-4 shrink-0 opacity-80" aria-hidden="true" />
+                <span className="min-w-0 flex-1 truncate text-left">Replay onboarding</span>
+              </button>
+            )}
           </Sidebar.Footer>
         </div>
       </Sidebar>

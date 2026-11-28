@@ -25,11 +25,11 @@ import { test, expect, type Page } from '@playwright/test';
 
 async function navegarAteOCatalogoPeloMenu(page: Page) {
   await page.goto('/');
-  await page.getByRole('button', { name: /^prompts$/i }).click();
+  await page.getByRole('complementary').getByRole('link', { name: /^prompts$/i }).click();
   // Esperar o submenu TROCAR antes de clicar no item dele — a raiz tem itens de mesmo nome, e
   // clicar cedo demais acerta o da raiz com a navegação parecendo funcionar.
-  await expect(page.getByRole('button', { name: /^projects$/i })).toHaveCount(0);
-  await page.getByRole('button', { name: /^catalog$/i }).click();
+  await expect(page.getByRole('complementary').getByRole('link', { name: /^projects$/i })).toHaveCount(0);
+  await page.getByRole('complementary').getByRole('link', { name: /^catalog$/i }).click();
   await expect(page).toHaveURL(/\/promptly\/catalog$/);
 }
 

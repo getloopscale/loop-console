@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { useMemo } from 'react';
+import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { useRequireAuth } from '@/hooks/use-auth';
@@ -8,13 +8,18 @@ import { PageMetaProvider } from '@/hooks/use-page-meta';
 import { useCommandPalette } from '@/hooks/use-command-palette';
 import { useProjects } from '@/hooks/projects/use-projects';
 import { VerificationBanner } from '@/components/verification-banner';
-import { CommandPalette } from '@/components/command/command-palette';
 import { buildCommands, sortByRecentDeploy } from '@/components/command/commands';
 import { OnboardingPanel } from '@/components/onboarding/onboarding-panel';
 import { AppSidebar } from './app-sidebar';
+import { NavDrawer } from './nav-drawer';
 import { resolveActiveMenu } from './app-sidebar-menus';
 import { StatusBar } from './status-bar';
 import { TopBar } from './top-bar';
+
+// The palette is fetched the first time it is opened, which keeps it out of the first load.
+const CommandPalette = lazy(() =>
+  import('@/components/command/command-palette').then((m) => ({ default: m.CommandPalette })),
+);
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -41,6 +46,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const onObservability =
     pathname === '/observability' || pathname.startsWith('/observability/');
   const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette();
+  // The sidebar of a narrow window is open for the route it was opened on, so following a link
+  // of the menu closes it without an effect.
+  const [menuOpenOn, setMenuOpenOn] = useState<string | null>(null);
+  const menuOpen = menuOpenOn === pathname;
+  const closeMenu = useCallback(() => setMenuOpenOn(null), []);
   const { projects } = useProjects();
   // The project of the route, by the same rule that picks the sidebar menu.
   const currentProject = resolveActiveMenu(pathname).projectName;
@@ -79,11 +89,15 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       */}
       <div className="bg-background h-screen overflow-hidden text-foreground flex">
         {/* The sidebar is as tall as the window and scrolls its own list of entries. */}
-        <div className="h-full shrink-0">
+        <NavDrawer open={menuOpen} onClose={closeMenu}>
           <AppSidebar session={session} />
-        </div>
+        </NavDrawer>
         <div className="flex-1 flex flex-col min-w-0">
-          <TopBar onCommandPaletteOpen={() => setPaletteOpen(true)} />
+          <TopBar
+            onCommandPaletteOpen={() => setPaletteOpen(true)}
+            onMenuOpen={() => setMenuOpenOn(pathname)}
+            menuOpen={menuOpen}
+          />
           <main id="main-content" className="flex-1 overflow-y-auto">
             <div className="w-full px-6 py-5">
               {!verified && !onObservability && (
@@ -97,11 +111,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <StatusBar />
         </div>
       </div>
-      <CommandPalette
-        open={paletteOpen}
-        onOpenChange={setPaletteOpen}
-        commands={commands}
-      />
+      {paletteOpen && (
+        <Suspense fallback={null}>
+          <CommandPalette open onOpenChange={setPaletteOpen} commands={commands} />
+        </Suspense>
+      )}
       {/* Sprint 3 T3.2 v2: Floating onboarding panel (Linear/Vercel 2026
           pattern). Bottom-right fixed, never competes with sidebar nav.
           Collapses to badge with progress ring. Replaces cramped sidebar

@@ -40,9 +40,13 @@ describe('OverviewPage', () => {
     mockUseBuildStats.mockReturnValue({ byDay: [], last7d: 0, total: 0, loading: false, error: false });
   });
 
-  it('test_overview_renders_action_bar_with_add_new', () => {
+  it('creates a project from the Overview, in the same modal as the Projects screen', async () => {
+    // The button was "Add New" and only took the user to Projects, where they had to find and
+    // click "New Project" again.
     render(<OverviewPage />);
-    expect(screen.getByRole('button', { name: /add new/i })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'New Project' }));
+    const dialog = await screen.findByRole('dialog', { name: 'New project' });
+    expect(dialog.querySelector('[data-slot="modal-header"]')).not.toBeNull();
   });
 
 

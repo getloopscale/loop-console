@@ -29,15 +29,19 @@ describe('ColumnsToggle a11y (M98 D-M5)', () => {
     expect(await screen.findByTestId('columns-panel')).toBeInTheDocument();
     await user.keyboard('{Escape}');
     await waitFor(() => expect(screen.queryByTestId('columns-panel')).toBeNull());
-    expect(trigger).toHaveFocus();
+    await waitFor(() => expect(trigger).toHaveFocus());
   });
 
-  it('an outside click closes the panel', async () => {
+  it('opens as the standard modal, with a header and a close button', async () => {
+    // It was a hand-made 92px panel under the button: the one dialog of the console that was
+    // neither centered nor built on the shared modal.
     const user = userEvent.setup();
     renderToggle();
     await user.click(screen.getByRole('button', { name: /choose columns/i }));
-    expect(await screen.findByTestId('columns-panel')).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'outside' }));
+    const dialog = await screen.findByRole('dialog', { name: /choose columns/i });
+    expect(dialog.querySelector('[data-slot="modal-header"]')).not.toBeNull();
+    expect(dialog.contains(screen.getByTestId('columns-panel'))).toBe(true);
+    await user.click(screen.getByRole('button', { name: 'Close' }));
     await waitFor(() => expect(screen.queryByTestId('columns-panel')).toBeNull());
   });
 
@@ -46,7 +50,7 @@ describe('ColumnsToggle a11y (M98 D-M5)', () => {
     renderToggle();
     const trigger = screen.getByRole('button', { name: /choose columns/i });
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
-    expect(trigger.getAttribute('aria-controls')).toBeTruthy(); // a useId-derived id (unique per instance)
+    expect(trigger).toHaveAttribute('aria-haspopup', 'dialog');
     await user.click(trigger);
     expect(trigger).toHaveAttribute('aria-expanded', 'true');
   });

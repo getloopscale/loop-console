@@ -54,6 +54,13 @@ describe('TeamPage', () => {
     expect(screen.getByText('admin')).toBeInTheDocument();
   });
 
+  it('scrolls the member table inside its card on a narrow window', async () => {
+    // At 390px the five columns made the whole document 574px wide (#677).
+    render(<TeamPage />);
+    const table = await screen.findByRole('table');
+    expect(table.closest('[data-slot="table-scroll"]')?.className).toMatch(/overflow-x-auto/);
+  });
+
   it('test_team_invite_member_opens_dialog', async () => {
     // Plan v1.2 divergence: invite is delegated to docs.getloopscale.com/teams/invite via
     // ActionBar.primaryAction (window.open) — no in-app dialog. Verify button exists.

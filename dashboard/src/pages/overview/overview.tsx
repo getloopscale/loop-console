@@ -20,6 +20,7 @@ import { PlatformSignals } from '@/pages/overview/platform-signals';
 import { usePageMeta } from '@/hooks/use-page-meta';
 import { useRequireAuth } from '@/hooks/use-auth';
 import { useProjects } from '@/hooks/projects/use-projects';
+import { CreateProjectSheet } from '@/pages/projects/components/create-project-sheet';
 import { useBuildStats } from '@/hooks/overview/use-build-stats';
 import { formatDate, isZeroTime } from '@/lib/formatting/format';
 
@@ -41,6 +42,7 @@ export function OverviewPage() {
   const { projects, loading } = useProjects();
   const deployStats = useBuildStats('7d');
   const [searchQuery, setSearchQuery] = useState('');
+  const [createOpen, setCreateOpen] = useState(false);
 
   const filteredProjects = projects.filter((p) =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -59,9 +61,9 @@ export function OverviewPage() {
         onChange: setSearchQuery,
       }}
       primaryAction={{
-        label: 'Add New',
+        label: 'New Project',
         icon: Plus,
-        onClick: () => navigate('/projects'),
+        onClick: () => setCreateOpen(true),
       }}
     >
       {/* J-06 T3.1: the KPI strip is the authenticated home's at-a-glance row. */}
@@ -217,6 +219,11 @@ export function OverviewPage() {
 
         </div>
       </ContentGrid>
+      <CreateProjectSheet
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onCreated={(p) => navigate(`/projects/${encodeURIComponent(p.name)}`)}
+      />
     </PageShell>
   );
 }

@@ -1,6 +1,8 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Button, Checkbox } from '@getloopscale/ui';
 import { Columns3 } from 'lucide-react';
+
+import { AppModal } from '@/components/ui/app-modal';
 
 import { TOGGLEABLE_COLUMNS, type ColumnState } from './view-encoding';
 
@@ -9,11 +11,10 @@ import { TOGGLEABLE_COLUMNS, type ColumnState } from './view-encoding';
  * columns"). A button reveals a small panel of `Checkbox`es for the optional spine columns
  * (latency/tokens/cost); toggling writes the encoded `cols=` URL param via `onChange`, so the M52
  * saved view captures the choice for free (no schema change — ADR D4). Composed from `@getloopscale/ui`
- * primitives + local state (no Radix menu) so it is deterministic under test.
+ * primitives.
  *
- * M98 (D-M5) — a11y for the hand-rolled popover: Escape closes it (and returns focus to the trigger),
- * an outside click/tap closes it, and opening moves focus into the panel. `aria-controls`/`role=dialog`
- * wire the trigger to the panel for assistive tech.
+ * It opens as the shared modal, like every other dialog of the console. The modal owns Escape,
+ * the focus trap and the return of focus to the trigger.
  */
 export function ColumnsToggle({
   state,
@@ -23,64 +24,40 @@ export function ColumnsToggle({
   onChange: (next: ColumnState) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const panelId = useId(); // unique per instance — no dangling/colliding IDREF
-  const rootRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-
-  const close = (returnFocus: boolean) => {
+  const trigger = useRef<HTMLButtonElement>(null);
+  // Closing hands the focus back to the button, so the keyboard continues from where it was.
+  const close = () => {
     setOpen(false);
-    if (returnFocus) triggerRef.current?.focus();
+    requestAnimationFrame(() => trigger.current?.focus());
   };
-
-  useEffect(() => {
-    if (!open) return;
-    // Move focus into the panel so keyboard users land on the first control.
-    panelRef.current?.querySelector<HTMLElement>('input,[role="checkbox"],button')?.focus();
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') close(true);
-    };
-    const onPointerDown = (e: PointerEvent) => {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) close(false);
-    };
-    document.addEventListener('keydown', onKeyDown);
-    document.addEventListener('pointerdown', onPointerDown);
-    return () => {
-      document.removeEventListener('keydown', onKeyDown);
-      document.removeEventListener('pointerdown', onPointerDown);
-    };
-  }, [open]);
 
   const toggle = (key: string) =>
     onChange({ ...state, visibility: { ...state.visibility, [key]: !(state.visibility[key] ?? true) } });
 
   return (
-    <div className="relative" ref={rootRef}>
+    <>
       <Button
-        ref={triggerRef}
+        ref={trigger}
         variant="ghost"
         size="sm"
         aria-expanded={open}
         aria-haspopup="dialog"
-        aria-controls={panelId}
         aria-label="Choose columns"
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => setOpen(true)}
       >
         <Columns3 className="mr-1 h-4 w-4" />
         Columns
       </Button>
-      {open ? (
-        <div
-          ref={panelRef}
-          id={panelId}
-          role="dialog"
-          aria-label="Choose columns"
-          data-testid="columns-panel"
-          className="absolute right-0 z-10 mt-1 flex flex-col gap-2 rounded-md border border-border bg-popover p-3 shadow-md"
-        >
+      <AppModal
+        open={open}
+        onClose={close}
+        size="sm"
+        title="Choose columns"
+        description="The choice is kept in the address, so a saved view carries it."
+      >
+        <div data-testid="columns-panel" className="flex flex-col gap-3">
           {TOGGLEABLE_COLUMNS.map((key) => (
-            <label key={key} className="flex items-center gap-2 text-xs capitalize">
+            <label key={key} className="flex items-center gap-2 text-sm capitalize">
               <Checkbox
                 checked={state.visibility[key] ?? true}
                 onCheckedChange={() => toggle(key)}
@@ -90,7 +67,7 @@ export function ColumnsToggle({
             </label>
           ))}
         </div>
-      ) : null}
-    </div>
+      </AppModal>
+    </>
   );
 }

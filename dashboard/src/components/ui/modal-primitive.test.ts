@@ -126,6 +126,33 @@ describe('primitivo de modal único', () => {
     ).toEqual([]);
   });
 
+  it('every creation route opens its form as a modal over the list it came from', () => {
+    // `/skills/new`, `/promptly/new` and `/trust/guardrails/new` were whole pages while every
+    // other creation in the console was a modal. A route ending in `/new` now renders the list
+    // and, after it, a screen built on `RouteModal`.
+    const lazy = readFileSync(join(SRC, 'app-routes-lazy.ts'), 'utf8');
+    const fileOf = (component: string): string => {
+      const found = new RegExp(`export const ${component} = lazy\\(\\(\\) =>\\s*import\\('@/([^']+)'\\)`).exec(lazy);
+      if (!found) throw new Error(`no lazy import for ${component}`);
+      return join(SRC, `${found[1]}.tsx`);
+    };
+    const offenders: string[] = [];
+    let creationRoutes = 0;
+    for (const f of arquivosDeProducao(join(SRC, 'routes'))) {
+      const src = readFileSync(f, 'utf8');
+      for (const m of src.matchAll(/<Route path="([^"]*\/new)" element=\{([^\n]+)\} \/>/g)) {
+        creationRoutes++;
+        const components = [...m[2].matchAll(/<([A-Z]\w+) \/>/g)].map((c) => c[1]);
+        const form = components.at(-1);
+        if (components.length < 2 || !form || !/<RouteModal\b/.test(readFileSync(fileOf(form), 'utf8'))) {
+          offenders.push(m[1]);
+        }
+      }
+    }
+    expect(creationRoutes, 'the guard found no creation route').toBeGreaterThanOrEqual(3);
+    expect(offenders, 'Render the list and then a screen built on RouteModal.\n').toEqual([]);
+  });
+
   it('a confirmation that deletes, removes or revokes is marked destructive', () => {
     // Found on staging: "Delete project" opened with the neutral button and no warning mark,
     // while "Delete Team", one screen away, had both. The mark and the red button come from

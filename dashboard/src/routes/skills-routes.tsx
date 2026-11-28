@@ -21,7 +21,7 @@ export const rotasDeSkills = (
   <>
     <Route path="/skills" element={<Boundaried path="/skills"><SkillsOverviewPage /></Boundaried>} />
     <Route path="/skills/catalog" element={<Boundaried path="/skills/catalog"><SkillsCatalogPage /></Boundaried>} />
-    <Route path="/skills/new" element={<Boundaried path="/skills/new"><SkillAuthoringPage /></Boundaried>} />
+    <Route path="/skills/new" element={<Boundaried path="/skills/new"><SkillsOverviewPage /><SkillAuthoringPage /></Boundaried>} />
     <Route path="/skills/discovery" element={<Boundaried path="/skills/discovery"><SkillsDiscoveryPage /></Boundaried>} />
     {/* As rotas antigas em português seguem RESOLVENDO, por redirect.
     A URL é parte do que o usuário vê, e o produto é monolíngue — mas um link

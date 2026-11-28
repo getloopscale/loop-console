@@ -14,6 +14,7 @@
 - `VITE_OAUTH_URL` sets the OAuth2 server's public origin (Hydra). The dashboard follows a redirect there, so `login` from the CLI completes when Hydra runs on a host of its own (#531).
 
 ### Changed
+- New skill, New revision and New guardrail open as a modal over the list they belong to, at the same address as before. Closing goes back to the list, and a click outside does not close them (#674).
 - Sidebar: every entry is a link, so it opens in a new tab and can be copied. The entry the user is in stays marked on the page of one sandbox, collection, skill or deployment. The groups sit closer together, and Documentation and Replay onboarding line up with the menu rows (#671).
 - Sandboxes opens a sidebar of its own, with Sandboxes, Templates and Secrets, like the other areas. The links under the page title are gone (#669).
 - Every create, edit and confirm action opens in the same centered modal: a header with an icon, the title and the description, a body that scrolls on its own, and a footer bar. "Add secret", "Bulk upload .env", "Invite teammate", "Rotation history", "Recent deliveries", the trace detail and the file preview no longer slide in from the right. A destructive confirmation shows a warning mark in the header, a modal with a request in flight does not close, and on a phone the panel docks to the bottom of the screen (#662).

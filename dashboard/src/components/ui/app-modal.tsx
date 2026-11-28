@@ -99,6 +99,11 @@ export interface AppModalProps {
   readonly bodyClassName?: string;
   /** Hide the built-in close (X) button (Radix still closes on ESC/overlay). */
   readonly hideCloseButton?: boolean;
+  /**
+   * A click outside the panel does not close it. For a long form, where a stray click on the
+   * overlay would throw the typing away. ESC and the close button still close.
+   */
+  readonly keepOnOutsideClick?: boolean;
 }
 
 /**
@@ -120,6 +125,7 @@ export function AppModal({
   contentClassName,
   bodyClassName,
   hideCloseButton,
+  keepOnOutsideClick = false,
 }: AppModalProps) {
   const mark = icon ?? (intent === 'destructive' ? <TriangleAlert className="size-4" aria-hidden="true" /> : null);
   return (
@@ -138,7 +144,7 @@ export function AppModal({
             if (busy) event.preventDefault();
           }}
           onInteractOutside={(event) => {
-            if (busy) event.preventDefault();
+            if (busy || keepOnOutsideClick) event.preventDefault();
           }}
           className={twMerge(
             'fixed left-1/2 top-1/2 z-50 flex max-h-[85vh] w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-xl border border-border bg-card text-foreground shadow-2xl animate-modal-in',

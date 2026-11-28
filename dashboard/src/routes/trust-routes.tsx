@@ -26,7 +26,7 @@ export const rotasDeTrust = (
     <Route path="/trust" element={<Boundaried path="/trust"><TrustOverviewPage /></Boundaried>} />
     <Route path="/trust/violations" element={<Boundaried path="/trust/violations"><TrustViolationsPage /></Boundaried>} />
     <Route path="/trust/guardrails" element={<Boundaried path="/trust/guardrails"><TrustGuardrailsPage /></Boundaried>} />
-    <Route path="/trust/guardrails/new" element={<Boundaried path="/trust/guardrails/new"><TrustGuardrailNewPage /></Boundaried>} />
+    <Route path="/trust/guardrails/new" element={<Boundaried path="/trust/guardrails/new"><TrustGuardrailsPage /><TrustGuardrailNewPage /></Boundaried>} />
     <Route path="/trust/enforcement" element={<Boundaried path="/trust/enforcement"><TrustEnforcementPage /></Boundaried>} />
   </>
 );
